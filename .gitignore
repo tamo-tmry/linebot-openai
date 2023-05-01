@@ -7,11 +7,3 @@ dist/
 
 # pnpm
 .pnpm/
-
-# TypeScript
-*.tsbuildinfo
-*.log
-*.pid
-*.seed
-*.json
-*.lock

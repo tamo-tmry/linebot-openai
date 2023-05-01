@@ -1,4 +1,1 @@
-# linebot-aws-utilities
-
-AWS を活用した LINE Bot を開発する際に汎用的な実装をまとめたリポジトリです。（予定）
-複数言語で取り扱う想定で言語別にディレクトリを切っています。
+# linebot-openai
