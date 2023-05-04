@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@line/bot-sdk": "^7.5.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"
   },

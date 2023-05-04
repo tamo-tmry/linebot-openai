@@ -13,6 +13,16 @@ functions:
       - http:
           path: /
           method: POST
+    environment:
+      LINE_CHANNEL_SECRET: ${env:LINE_CHANNEL_SECRET}
+      LINE_CHANNEL_ACCESS_TOKEN: ${env:LINE_CHANNEL_ACCESS_TOKEN}
+
+layers:
+  lineBotSdkLayer:
+    path: layers/line-bot-sdk
+    compatibleRuntimes:
+      - nodejs18.x
+    retain: false
 
 # TODO: DynamoDBの設定追加
 # resources:
