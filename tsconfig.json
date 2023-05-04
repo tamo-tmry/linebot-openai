@@ -4,17 +4,17 @@
     "module": "ES2020",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "outDir": "./dist",
-    "rootDir": "./",
+    "outDir": "dist",
+    "rootDir": "src",
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "declaration": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "baseUrl": "."
+    "baseUrl": "src"
   },
-  "include": ["./**/*.ts"],
-  "exclude": ["./node_modules"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"],
   "compileOnSave": true
 }

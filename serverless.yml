@@ -1,0 +1,58 @@
+service: linebot-openai
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ap-northeast-1
+
+functions:
+  linebotOpenAi:
+    handler: dist/index.handler
+    events:
+      - http:
+          path: /
+          method: POST
+
+# TODO: DynamoDBの設定追加
+# resources:
+#   Resources:
+#     linebotOpenAiDb:
+#       Type: 'AWS::DynamoDB::Table'
+#       DeletionPolicy: Retain
+#       Properties:
+#         TableName: linebot-openai-table-${self:provider.stage}
+#         AttributeDefinitions:
+#           - AttributeName: id
+#             AttributeType: S
+#           - AttributeName: lineUserId
+#             AttributeType: S
+#           - AttributeName: content
+#             AttributeType: S
+#           - AttributeName: role
+#             AttributeType: S
+#           - AttributeName: createdAt
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: id
+#             KeyType: HASH
+#         GlobalSecondaryIndexes:
+#           - IndexName: byLineUserId
+#             KeySchema:
+#               - AttributeName: lineUserId
+#                 KeyType: HASH
+#               - AttributeName: createdAt
+#                 KeyType: RANGE
+#             Projection:
+#               ProjectionType: ALL
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1
+#         StreamSpecification:
+#           StreamViewType: NEW_AND_OLD_IMAGES
+
+package:
+  exclude:
+    - ./**
+  include:
+    - dist/**

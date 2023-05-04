@@ -7,3 +7,13 @@
 // TODO: OpenAI APIからのレスポンスをDynamoDBへ保存
 
 // TODO: LINE BOTへレスポンスを返す
+
+// MEMO: Sample
+exports.handler = async (event: any, context: any) => {
+  console.log('boot test', event, context)
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Success' }),
+  }
+}
