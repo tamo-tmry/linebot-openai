@@ -1,7 +1,0 @@
-{
-  "name": "line-bot-sdk-layer",
-  "version": "1.0.0",
-  "dependencies": {
-    "@line/bot-sdk": "^7.4.0"
-  }
-}

@@ -18,17 +18,17 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install pnpm
-        run: npm install -g pnpm
+      - name: Install yarn
+        run: npm install -g yarn
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: yarn install
 
       - name: Build project
-        run: pnpm run build
+        run: yarn build
 
       - name: Deploy to AWS using Serverless Framework
-        run: pnpm run deploy:prod
+        run: yarn deploy:prod
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

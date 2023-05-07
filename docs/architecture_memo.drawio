@@ -1,29 +1,55 @@
 <mxfile host="65bd71144e">
-    <diagram id="OgRPGlaCWBxBChvjKtZ8" name="ページ1">
-        <mxGraphModel dx="940" dy="742" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <diagram id="XqtiewbEH52xIGi5MUNX" name="LINE Messaging API">
+        <mxGraphModel dx="1055" dy="1223" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="20" value="&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;span style=&quot;background-color: initial; font-size: 16px;&quot;&gt;流れ&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fontColor=default;fillColor=none;align=center;verticalAlign=top;fontSize=16;fontStyle=1" vertex="1" parent="1">
+                <mxCell id="0GTTBtzta1S6LtpW5U6M-7" value="POST形式でやりとり" style="edgeStyle=none;html=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="0GTTBtzta1S6LtpW5U6M-1" target="0GTTBtzta1S6LtpW5U6M-6">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="0GTTBtzta1S6LtpW5U6M-1" value="LINE Messaging API" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="350" y="590" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0GTTBtzta1S6LtpW5U6M-3" style="edgeStyle=none;html=1;startArrow=classic;startFill=1;" edge="1" parent="1" source="0GTTBtzta1S6LtpW5U6M-2" target="0GTTBtzta1S6LtpW5U6M-1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="0GTTBtzta1S6LtpW5U6M-2" value="User&lt;br&gt;(LINE APP)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+                    <mxGeometry x="170" y="590" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0GTTBtzta1S6LtpW5U6M-6" value="Custom System" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="650" y="590" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="0GTTBtzta1S6LtpW5U6M-8" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;自身のシステムをLINEユーザーに対して提供したい場合に使用するAPI&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="149" y="480" width="530" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+    <diagram id="OgRPGlaCWBxBChvjKtZ8" name="ページ1">
+        <mxGraphModel dx="1055" dy="1223" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="20" value="&lt;div style=&quot;font-size: 16px;&quot;&gt;&lt;span style=&quot;background-color: initial; font-size: 16px;&quot;&gt;流れ&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fontColor=default;fillColor=none;align=center;verticalAlign=top;fontSize=16;fontStyle=1" parent="1" vertex="1">
                     <mxGeometry x="64" y="220" width="700" height="330" as="geometry"/>
                 </mxCell>
                 <mxCell id="2" value="" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#4D72F3;gradientDirection=north;fillColor=#3334B9;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;" parent="1" vertex="1">
                     <mxGeometry x="620" y="321" width="78" height="78" as="geometry"/>
                 </mxCell>
-                <mxCell id="12" value="2: プロンプトを送る" style="edgeStyle=orthogonalEdgeStyle;html=1;fontColor=default;exitX=0.75;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="11">
+                <mxCell id="12" value="2: プロンプトを送る" style="edgeStyle=orthogonalEdgeStyle;html=1;fontColor=default;exitX=0.75;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="3" target="11" edge="1">
                     <mxGeometry x="0.0638" relative="1" as="geometry">
                         <mxPoint x="1" as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="15" value="4: 結果をDynamoDBへ保存" style="edgeStyle=none;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;fontColor=default;exitX=1;exitY=0.75;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="3" target="2">
+                <mxCell id="15" value="4: 結果をDynamoDBへ保存" style="edgeStyle=none;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;fontColor=default;exitX=1;exitY=0.75;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" source="3" target="2" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="16" value="5: 結果を返す" style="edgeStyle=none;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;fontColor=default;" edge="1" parent="1" source="3" target="5">
+                <mxCell id="16" value="5: 結果を返す" style="edgeStyle=none;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;fontColor=default;" parent="1" source="3" target="5" edge="1">
                     <mxGeometry relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="23" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;1: 一番新しい履歴の取得&lt;/font&gt;" style="html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=14;fontColor=default;" edge="1" parent="1" source="3" target="2">
+                <mxCell id="23" value="&lt;font style=&quot;font-size: 12px;&quot;&gt;1: 一番新しい履歴の取得&lt;/font&gt;" style="html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;fontSize=14;fontColor=default;" parent="1" source="3" target="2" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="3" value="" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#F78E04;gradientDirection=north;fillColor=#D05C17;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" parent="1" vertex="1">
@@ -41,16 +67,16 @@
                 <mxCell id="7" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
                     <mxGeometry x="104" y="329" width="30" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="14" value="3: 結果を返す" style="edgeStyle=orthogonalEdgeStyle;html=1;fontColor=default;entryX=0.25;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="11" target="3">
+                <mxCell id="14" value="3: 結果を返す" style="edgeStyle=orthogonalEdgeStyle;html=1;fontColor=default;entryX=0.25;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" parent="1" source="11" target="3" edge="1">
                     <mxGeometry x="-0.2496" relative="1" as="geometry">
                         <mxPoint x="474" y="410" as="targetPoint"/>
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="11" value="OpenAI API" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fontColor=default;fillColor=none;" vertex="1" parent="1">
+                <mxCell id="11" value="OpenAI API" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fontColor=default;fillColor=none;" parent="1" vertex="1">
                     <mxGeometry x="599" y="430" width="120" height="80" as="geometry"/>
                 </mxCell>
-                <mxCell id="22" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;▼ Lambdaでやらないといけないこと&lt;br&gt;- [ ] LINE BOTからのリクエスト受け取り&lt;br&gt;- [ ] DynamoDBから一番新しい履歴を取得&lt;br&gt;- [ ] OpenAI APIへのリクエスト&lt;br&gt;- [ ] OpenAI APIからのレスポンスをDynamoDBへ保存&lt;br&gt;- [ ] LINE BOTへレスポンスを返す&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fontSize=16;fontColor=default;fillColor=none;align=left;verticalAlign=top;" vertex="1" parent="1">
+                <mxCell id="22" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;▼ Lambdaでやらないといけないこと&lt;br&gt;- [ ] LINE BOTからのリクエスト受け取り&lt;br&gt;- [ ] DynamoDBから一番新しい履歴を取得&lt;br&gt;- [ ] OpenAI APIへのリクエスト&lt;br&gt;- [ ] OpenAI APIからのレスポンスをDynamoDBへ保存&lt;br&gt;- [ ] LINE BOTへレスポンスを返す&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;fontSize=16;fontColor=default;fillColor=none;align=left;verticalAlign=top;" parent="1" vertex="1">
                     <mxGeometry x="64" y="610" width="696" height="340" as="geometry"/>
                 </mxCell>
             </root>
