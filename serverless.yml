@@ -16,6 +16,7 @@ functions:
     environment:
       LINE_CHANNEL_SECRET: ${env:LINE_CHANNEL_SECRET}
       LINE_CHANNEL_ACCESS_TOKEN: ${env:LINE_CHANNEL_ACCESS_TOKEN}
+      OPENAI_API_KEY: ${env:OPENAI_API_KEY}
 
 # TODO: DynamoDBの設定追加
 # resources:
