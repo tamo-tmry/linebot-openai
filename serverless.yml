@@ -5,6 +5,15 @@ provider:
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
   region: ap-northeast-1
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'dynamodb:*'
+          Resource: '*'
+  environment:
+    DYNAMODB_TABLE_NAME: linebot-openai-table-${self:provider.stage}
 
 functions:
   linebotOpenAi:
@@ -17,43 +26,34 @@ functions:
       LINE_CHANNEL_SECRET: ${env:LINE_CHANNEL_SECRET}
       LINE_CHANNEL_ACCESS_TOKEN: ${env:LINE_CHANNEL_ACCESS_TOKEN}
       OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+      DYNAMODB_TABLE_NAME: ${self:provider.environment.DYNAMODB_TABLE_NAME}
 
-# TODO: DynamoDBの設定追加
-# resources:
-#   Resources:
-#     linebotOpenAiDb:
-#       Type: 'AWS::DynamoDB::Table'
-#       DeletionPolicy: Retain
-#       Properties:
-#         TableName: linebot-openai-table-${self:provider.stage}
-#         AttributeDefinitions:
-#           - AttributeName: id
-#             AttributeType: S
-#           - AttributeName: lineUserId
-#             AttributeType: S
-#           - AttributeName: content
-#             AttributeType: S
-#           - AttributeName: role
-#             AttributeType: S
-#           - AttributeName: createdAt
-#             AttributeType: S
-#         KeySchema:
-#           - AttributeName: id
-#             KeyType: HASH
-#         GlobalSecondaryIndexes:
-#           - IndexName: byLineUserId
-#             KeySchema:
-#               - AttributeName: lineUserId
-#                 KeyType: HASH
-#               - AttributeName: createdAt
-#                 KeyType: RANGE
-#             Projection:
-#               ProjectionType: ALL
-#         ProvisionedThroughput:
-#           ReadCapacityUnits: 1
-#           WriteCapacityUnits: 1
-#         StreamSpecification:
-#           StreamViewType: NEW_AND_OLD_IMAGES
+resources:
+  Resources:
+    linebotOpenAiDb:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: lineUserId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: byLineUserId
+            KeySchema:
+              - AttributeName: lineUserId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
 
 package:
   exclude:

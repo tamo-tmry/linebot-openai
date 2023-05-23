@@ -10,11 +10,15 @@ import {
   OpenAIApi,
 } from 'openai'
 import { APIGatewayEvent } from 'aws-lambda'
+import { DynamoDB } from 'aws-sdk'
 import crypto from 'crypto'
+import { v4 as uuidv4 } from 'uuid'
 
 const channelSecret = process.env.LINE_CHANNEL_SECRET!
 const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN!
 const openaiApiKey = process.env.OPENAI_API_KEY!
+const tableName = process.env.DYNAMODB_TABLE_NAME!
+const dynamoDB = new DynamoDB.DocumentClient()
 
 function validateSignature(body: string, signature: string) {
   const hash = crypto
@@ -27,6 +31,7 @@ function validateSignature(body: string, signature: string) {
 exports.handler = async (event: APIGatewayEvent) => {
   const body: WebhookRequestBody = JSON.parse(event.body!)
   const signature = event.headers['x-line-signature']
+  const userId = body.events[0].source.userId
 
   if (!validateSignature(event.body!, signature!)) {
     return {
@@ -55,15 +60,38 @@ exports.handler = async (event: APIGatewayEvent) => {
           const commonMessage = {
             role: ChatCompletionRequestMessageRoleEnum.System,
             content:
-              'タメ口だけど優しく、絵文字もたくさん使いながら喋ってください。',
+              'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。主語は「おいら」にしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。',
           }
 
-          // TODO: DynamoDBから一番新しい履歴を取得
+          const data = await dynamoDB
+            .query({
+              TableName: tableName,
+              IndexName: 'byLineUserId',
+              KeyConditionExpression: '#lineUserId = :lineUserId',
+              ExpressionAttributeNames: {
+                '#lineUserId': 'lineUserId',
+              },
+              ExpressionAttributeValues: {
+                ':lineUserId': userId,
+              },
+              ScanIndexForward: false,
+              Limit: 10,
+            })
+            .promise()
+
+          const items =
+            data.Items?.map((item) => {
+              return {
+                role: item.role,
+                content: item.content,
+              }
+            }).reverse() || []
 
           const response = await openai.createChatCompletion({
             model: 'gpt-3.5-turbo',
             messages: [
               commonMessage,
+              ...items,
               {
                 role: ChatCompletionRequestMessageRoleEnum.User,
                 content: message,
@@ -73,8 +101,38 @@ exports.handler = async (event: APIGatewayEvent) => {
 
           const answer = response.data.choices[0].message?.content
 
-          // TODO: OpenAI APIからのレスポンスをDynamoDBへ保存
           if (answer) {
+            dynamoDB.put(
+              {
+                TableName: tableName,
+                Item: {
+                  id: uuidv4(),
+                  lineUserId: userId,
+                  role: 'user',
+                  content: message,
+                  createdAt: new Date().toISOString(),
+                },
+              },
+              (err) => {
+                console.log('DB put error: ', err)
+              },
+            )
+
+            dynamoDB.put(
+              {
+                TableName: tableName,
+                Item: {
+                  id: uuidv4(),
+                  lineUserId: userId,
+                  role: 'assistant',
+                  content: answer,
+                  createdAt: new Date().toISOString(),
+                },
+              },
+              (err) => {
+                console.log('DB put error: ', err)
+              },
+            )
           }
 
           const userMessage: Message = {
