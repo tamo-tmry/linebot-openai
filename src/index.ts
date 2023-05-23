@@ -13,12 +13,19 @@ import { APIGatewayEvent } from 'aws-lambda'
 import { DynamoDB } from 'aws-sdk'
 import crypto from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
+import vision from '@google-cloud/vision'
 
 const channelSecret = process.env.LINE_CHANNEL_SECRET!
 const channelAccessToken = process.env.LINE_CHANNEL_ACCESS_TOKEN!
 const openaiApiKey = process.env.OPENAI_API_KEY!
 const tableName = process.env.DYNAMODB_TABLE_NAME!
+const googleApplicationCredentials = JSON.parse(
+  process.env.GOOGLE_APPLICATION_CREDENTIALS!,
+)
 const dynamoDB = new DynamoDB.DocumentClient()
+const visionClient = new vision.ImageAnnotatorClient({
+  credentials: googleApplicationCredentials,
+})
 
 function validateSignature(body: string, signature: string) {
   const hash = crypto
@@ -32,6 +39,10 @@ exports.handler = async (event: APIGatewayEvent) => {
   const body: WebhookRequestBody = JSON.parse(event.body!)
   const signature = event.headers['x-line-signature']
   const userId = body.events[0].source.userId
+  const modelName = 'gpt-3.5-turbo'
+  const commonMessageContent =
+    'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。主語は「おいら」にしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。'
+  const failedMessage = '失敗しちゃった。もう一回試してね。'
 
   if (!validateSignature(event.body!, signature!)) {
     return {
@@ -59,8 +70,7 @@ exports.handler = async (event: APIGatewayEvent) => {
           const message = event.message.text
           const commonMessage = {
             role: ChatCompletionRequestMessageRoleEnum.System,
-            content:
-              'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。主語は「おいら」にしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。',
+            content: commonMessageContent,
           }
 
           const data = await dynamoDB
@@ -88,7 +98,7 @@ exports.handler = async (event: APIGatewayEvent) => {
             }).reverse() || []
 
           const response = await openai.createChatCompletion({
-            model: 'gpt-3.5-turbo',
+            model: modelName,
             messages: [
               commonMessage,
               ...items,
@@ -108,7 +118,7 @@ exports.handler = async (event: APIGatewayEvent) => {
                 Item: {
                   id: uuidv4(),
                   lineUserId: userId,
-                  role: 'user',
+                  role: ChatCompletionRequestMessageRoleEnum.User,
                   content: message,
                   createdAt: new Date().toISOString(),
                 },
@@ -117,14 +127,13 @@ exports.handler = async (event: APIGatewayEvent) => {
                 console.log('DB put error: ', err)
               },
             )
-
             dynamoDB.put(
               {
                 TableName: tableName,
                 Item: {
                   id: uuidv4(),
                   lineUserId: userId,
-                  role: 'assistant',
+                  role: ChatCompletionRequestMessageRoleEnum.Assistant,
                   content: answer,
                   createdAt: new Date().toISOString(),
                 },
@@ -137,9 +146,93 @@ exports.handler = async (event: APIGatewayEvent) => {
 
           const userMessage: Message = {
             type: 'text',
-            text: answer || '失敗しちゃった。もう一回試してね。',
+            text: answer || failedMessage,
           }
           return client.replyMessage(replyToken, userMessage)
+        }
+
+        if (event.type === 'message' && event.message.type === 'image') {
+          const replyToken = event.replyToken
+          const stream = await client.getMessageContent(event.message.id)
+
+          let imageBytes = []
+          for await (const data of stream) {
+            imageBytes.push(...data)
+          }
+
+          const [result] = await visionClient.textDetection({
+            image: { content: Buffer.from(imageBytes) },
+          })
+
+          const detections = result.textAnnotations
+
+          detections!.forEach((text) => console.log(text))
+
+          const message = detections && detections[0].description
+
+          if (message) {
+            const commonMessage = {
+              role: ChatCompletionRequestMessageRoleEnum.System,
+              content: commonMessageContent,
+            }
+
+            const response = await openai.createChatCompletion({
+              model: modelName,
+              messages: [
+                commonMessage,
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.User,
+                  content: message,
+                },
+              ],
+            })
+
+            const answer = response.data.choices[0].message?.content
+
+            if (answer) {
+              dynamoDB.put(
+                {
+                  TableName: tableName,
+                  Item: {
+                    id: uuidv4(),
+                    lineUserId: userId,
+                    role: ChatCompletionRequestMessageRoleEnum.User,
+                    content: message,
+                    createdAt: new Date().toISOString(),
+                  },
+                },
+                (err) => {
+                  console.log('DB put error: ', err)
+                },
+              )
+              dynamoDB.put(
+                {
+                  TableName: tableName,
+                  Item: {
+                    id: uuidv4(),
+                    lineUserId: userId,
+                    role: ChatCompletionRequestMessageRoleEnum.Assistant,
+                    content: answer,
+                    createdAt: new Date().toISOString(),
+                  },
+                },
+                (err) => {
+                  console.log('DB put error: ', err)
+                },
+              )
+            }
+
+            return client.replyMessage(replyToken, {
+              type: 'text',
+              text: answer || failedMessage,
+            })
+          } else {
+            const userMessage: Message = {
+              type: 'text',
+              text: failedMessage,
+            }
+            return client.replyMessage(replyToken, userMessage)
+          }
         }
       }),
     )
