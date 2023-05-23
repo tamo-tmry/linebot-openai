@@ -35,10 +35,56 @@ function validateSignature(body: string, signature: string) {
   return hash === signature
 }
 
+const fetchPreviousConversations = async (userId: string) => {
+  const data = await dynamoDB
+    .query({
+      TableName: tableName,
+      IndexName: 'byLineUserId',
+      KeyConditionExpression: '#lineUserId = :lineUserId',
+      ExpressionAttributeNames: {
+        '#lineUserId': 'lineUserId',
+      },
+      ExpressionAttributeValues: {
+        ':lineUserId': userId,
+      },
+      ScanIndexForward: false,
+      Limit: 10,
+    })
+    .promise()
+  return data
+}
+
+type Conversation = {
+  role: ChatCompletionRequestMessageRoleEnum
+  content: string
+}
+
+const addConversations = async (
+  conversations: Conversation[],
+  userId: string,
+) => {
+  return Promise.all(
+    conversations.map((conversation) => {
+      return dynamoDB
+        .put({
+          TableName: tableName,
+          Item: {
+            id: uuidv4(),
+            lineUserId: userId,
+            role: conversation.role,
+            content: conversation.content,
+            createdAt: new Date().toISOString(),
+          },
+        })
+        .promise()
+    }),
+  )
+}
+
 exports.handler = async (event: APIGatewayEvent) => {
   const body: WebhookRequestBody = JSON.parse(event.body!)
   const signature = event.headers['x-line-signature']
-  const userId = body.events[0].source.userId
+  const userId = body.events[0].source.userId!
   const modelName = 'gpt-3.5-turbo'
   const commonMessageContent =
     'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。主語は「おいら」にしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。'
@@ -73,21 +119,7 @@ exports.handler = async (event: APIGatewayEvent) => {
             content: commonMessageContent,
           }
 
-          const data = await dynamoDB
-            .query({
-              TableName: tableName,
-              IndexName: 'byLineUserId',
-              KeyConditionExpression: '#lineUserId = :lineUserId',
-              ExpressionAttributeNames: {
-                '#lineUserId': 'lineUserId',
-              },
-              ExpressionAttributeValues: {
-                ':lineUserId': userId,
-              },
-              ScanIndexForward: false,
-              Limit: 10,
-            })
-            .promise()
+          const data = await fetchPreviousConversations(userId)
 
           const items =
             data.Items?.map((item) => {
@@ -112,36 +144,20 @@ exports.handler = async (event: APIGatewayEvent) => {
           const answer = response.data.choices[0].message?.content
 
           if (answer) {
-            dynamoDB.put(
+            const conversations: Conversation[] = [
               {
-                TableName: tableName,
-                Item: {
-                  id: uuidv4(),
-                  lineUserId: userId,
-                  role: ChatCompletionRequestMessageRoleEnum.User,
-                  content: message,
-                  createdAt: new Date().toISOString(),
-                },
+                role: ChatCompletionRequestMessageRoleEnum.User,
+                content: message,
               },
-              (err) => {
-                console.log('DB put error: ', err)
-              },
-            )
-            dynamoDB.put(
               {
-                TableName: tableName,
-                Item: {
-                  id: uuidv4(),
-                  lineUserId: userId,
-                  role: ChatCompletionRequestMessageRoleEnum.Assistant,
-                  content: answer,
-                  createdAt: new Date().toISOString(),
-                },
+                role: ChatCompletionRequestMessageRoleEnum.Assistant,
+                content: answer,
               },
-              (err) => {
-                console.log('DB put error: ', err)
-              },
-            )
+            ]
+
+            await addConversations(conversations, userId).catch((err) => {
+              console.log('DB put error: ', err)
+            })
           }
 
           const userMessage: Message = {
@@ -165,9 +181,6 @@ exports.handler = async (event: APIGatewayEvent) => {
           })
 
           const detections = result.textAnnotations
-
-          detections!.forEach((text) => console.log(text))
-
           const message = detections && detections[0].description
 
           if (message) {
@@ -190,36 +203,20 @@ exports.handler = async (event: APIGatewayEvent) => {
             const answer = response.data.choices[0].message?.content
 
             if (answer) {
-              dynamoDB.put(
+              const conversations: Conversation[] = [
                 {
-                  TableName: tableName,
-                  Item: {
-                    id: uuidv4(),
-                    lineUserId: userId,
-                    role: ChatCompletionRequestMessageRoleEnum.User,
-                    content: message,
-                    createdAt: new Date().toISOString(),
-                  },
+                  role: ChatCompletionRequestMessageRoleEnum.User,
+                  content: message,
                 },
-                (err) => {
-                  console.log('DB put error: ', err)
-                },
-              )
-              dynamoDB.put(
                 {
-                  TableName: tableName,
-                  Item: {
-                    id: uuidv4(),
-                    lineUserId: userId,
-                    role: ChatCompletionRequestMessageRoleEnum.Assistant,
-                    content: answer,
-                    createdAt: new Date().toISOString(),
-                  },
+                  role: ChatCompletionRequestMessageRoleEnum.Assistant,
+                  content: answer,
                 },
-                (err) => {
-                  console.log('DB put error: ', err)
-                },
-              )
+              ]
+
+              await addConversations(conversations, userId).catch((err) => {
+                console.log('DB put error: ', err)
+              })
             }
 
             return client.replyMessage(replyToken, {
