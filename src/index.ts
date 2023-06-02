@@ -122,7 +122,9 @@ exports.handler = async (event: APIGatewayEvent) => {
           ) {
             console.log('画像生成するよ')
             const response = await openai.createImage({
-              prompt: message,
+              prompt: message
+                .replace('の写真送って', '')
+                .replace('の画像送って', ''),
               n: 1,
               size: '1024x1024',
             })
