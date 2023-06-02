@@ -90,22 +90,10 @@ exports.handler = async (event: APIGatewayEvent) => {
     'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。主語は「おいら」にしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。'
   const failedMessage = '失敗しちゃった。もう一回試してね。'
   const imageGenerationKeywords = [
-    '写真送って',
-    '画像送って',
-    '写真を送って',
-    '画像を送って',
-    '写真ください',
-    '画像ください',
-    '写真をください',
-    '画像をください',
-    '写真お願い',
-    '画像お願い',
-    '写真をお願い',
-    '画像をお願い',
-    '写真ちょうだい',
-    '画像ちょうだい',
-    '写真をちょうだい',
-    '画像をちょうだい',
+    '写真撮って',
+    '写真とって',
+    'しゃしんとって',
+    'しゃしん撮って',
   ]
 
   if (!validateSignature(event.body!, signature!)) {
@@ -138,8 +126,15 @@ exports.handler = async (event: APIGatewayEvent) => {
             ) || ''
 
           if (Boolean(imageGenerationKeyword)) {
-            const promptMessage = message.replace(imageGenerationKeyword, '')
+            const keywordRemovalPattern = new RegExp(
+              `の?${imageGenerationKeyword}`,
+            )
+            const promptMessage = message.replace(keywordRemovalPattern, '')
             console.log('DEBUG promptMessage: ', promptMessage)
+            client.pushMessage(userId, {
+              type: 'text',
+              text: 'ちょっと待ってて、写真撮ってくるね！',
+            })
             const response = await openai.createImage({
               prompt: promptMessage,
               n: 1,
@@ -153,7 +148,12 @@ exports.handler = async (event: APIGatewayEvent) => {
               previewImageUrl: answerImage,
             }
 
-            return client.replyMessage(replyToken, userMessage)
+            client.replyMessage(replyToken, userMessage)
+            client.pushMessage(userId, {
+              type: 'text',
+              text: 'いい写真撮れたでしょ〜',
+            })
+            return
           } else {
             const commonMessage = {
               role: ChatCompletionRequestMessageRoleEnum.System,
