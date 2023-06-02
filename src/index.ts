@@ -133,7 +133,7 @@ exports.handler = async (event: APIGatewayEvent) => {
             const response = await openai.createImage({
               prompt: promptMessage,
               n: 1,
-              size: '1024x1024',
+              size: '512x512',
             })
 
             const answerImage = response.data.data[0].url!
