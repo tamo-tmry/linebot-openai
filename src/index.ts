@@ -130,11 +130,6 @@ exports.handler = async (event: APIGatewayEvent) => {
               `の?${imageGenerationKeyword}.*`,
             )
             const promptMessage = message.replace(keywordRemovalPattern, '')
-            console.log('DEBUG promptMessage: ', promptMessage)
-            client.pushMessage(userId, {
-              type: 'text',
-              text: 'ちょっと待ってて、写真撮ってくるね！',
-            })
             const response = await openai.createImage({
               prompt: promptMessage,
               n: 1,
@@ -142,19 +137,19 @@ exports.handler = async (event: APIGatewayEvent) => {
             })
 
             const answerImage = response.data.data[0].url!
-            console.log(answerImage)
-            const userMessage: Message = {
-              type: 'image',
-              originalContentUrl: answerImage,
-              previewImageUrl: answerImage,
-            }
+            const userMessage: Message[] = [
+              {
+                type: 'image',
+                originalContentUrl: answerImage,
+                previewImageUrl: answerImage,
+              },
+              {
+                type: 'text',
+                text: 'いい写真撮れたでしょ〜',
+              },
+            ]
 
-            client.replyMessage(replyToken, userMessage)
-            client.pushMessage(userId, {
-              type: 'text',
-              text: 'いい写真撮れたでしょ〜',
-            })
-            return
+            return client.replyMessage(replyToken, userMessage)
           } else {
             const commonMessage = {
               role: ChatCompletionRequestMessageRoleEnum.System,
