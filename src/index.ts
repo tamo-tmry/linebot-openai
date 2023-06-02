@@ -127,7 +127,7 @@ exports.handler = async (event: APIGatewayEvent) => {
 
           if (Boolean(imageGenerationKeyword)) {
             const keywordRemovalPattern = new RegExp(
-              `の?${imageGenerationKeyword}`,
+              `の?${imageGenerationKeyword}.*`,
             )
             const promptMessage = message.replace(keywordRemovalPattern, '')
             console.log('DEBUG promptMessage: ', promptMessage)
