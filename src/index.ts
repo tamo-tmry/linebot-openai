@@ -142,6 +142,7 @@ exports.handler = async (event: APIGatewayEvent) => {
             })
 
             const answerImage = response.data.data[0].url!
+            console.log(answerImage)
             const userMessage: Message = {
               type: 'image',
               originalContentUrl: answerImage,
