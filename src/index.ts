@@ -114,57 +114,78 @@ exports.handler = async (event: APIGatewayEvent) => {
         if (event.type === 'message' && event.message.type === 'text') {
           const replyToken = event.replyToken
           const message = event.message.text
-          const commonMessage = {
-            role: ChatCompletionRequestMessageRoleEnum.System,
-            content: commonMessageContent,
-          }
 
-          const data = await fetchPreviousConversations(userId)
-
-          const items =
-            data.Items?.map((item) => {
-              return {
-                role: item.role,
-                content: item.content,
-              }
-            }).reverse() || []
-
-          const response = await openai.createChatCompletion({
-            model: modelName,
-            messages: [
-              commonMessage,
-              ...items,
-              {
-                role: ChatCompletionRequestMessageRoleEnum.User,
-                content: message,
-              },
-            ],
-          })
-
-          const answer = response.data.choices[0].message?.content
-
-          if (answer) {
-            const conversations: Conversation[] = [
-              {
-                role: ChatCompletionRequestMessageRoleEnum.User,
-                content: message,
-              },
-              {
-                role: ChatCompletionRequestMessageRoleEnum.Assistant,
-                content: answer,
-              },
-            ]
-
-            await addConversations(conversations, userId).catch((err) => {
-              console.log('DB put error: ', err)
+          // 「写真送って」もしくは「画像送って」が含まれていたら
+          if (
+            message.includes('写真送って') ||
+            message.includes('画像送って')
+          ) {
+            console.log('画像生成するよ')
+            const response = await openai.createImage({
+              prompt: message,
+              n: 1,
+              size: '1024x1024',
             })
-          }
 
-          const userMessage: Message = {
-            type: 'text',
-            text: answer || failedMessage,
+            console.log('画像生成おわったよ', response)
+            const userMessage: Message = {
+              type: 'text',
+              text: '画像生成中' || failedMessage,
+            }
+            return client.replyMessage(replyToken, userMessage)
+          } else {
+            const commonMessage = {
+              role: ChatCompletionRequestMessageRoleEnum.System,
+              content: commonMessageContent,
+            }
+
+            const data = await fetchPreviousConversations(userId)
+
+            const items =
+              data.Items?.map((item) => {
+                return {
+                  role: item.role,
+                  content: item.content,
+                }
+              }).reverse() || []
+
+            const response = await openai.createChatCompletion({
+              model: modelName,
+              messages: [
+                commonMessage,
+                ...items,
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.User,
+                  content: message,
+                },
+              ],
+            })
+
+            const answer = response.data.choices[0].message?.content
+
+            if (answer) {
+              const conversations: Conversation[] = [
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.User,
+                  content: message,
+                },
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.Assistant,
+                  content: answer,
+                },
+              ]
+
+              await addConversations(conversations, userId).catch((err) => {
+                console.log('DB put error: ', err)
+              })
+            }
+
+            const userMessage: Message = {
+              type: 'text',
+              text: answer || failedMessage,
+            }
+            return client.replyMessage(replyToken, userMessage)
           }
-          return client.replyMessage(replyToken, userMessage)
         }
 
         if (event.type === 'message' && event.message.type === 'image') {
