@@ -127,7 +127,7 @@ exports.handler = async (event: APIGatewayEvent) => {
               size: '1024x1024',
             })
 
-            console.log('画像生成おわったよ', response)
+            console.log('画像生成おわったよ', response.data.data[0].url)
             const userMessage: Message = {
               type: 'text',
               text: '画像生成中' || failedMessage,
