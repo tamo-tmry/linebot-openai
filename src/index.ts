@@ -87,7 +87,7 @@ exports.handler = async (event: APIGatewayEvent) => {
   const userId = body.events[0].source.userId!
   const modelName = 'gpt-3.5-turbo'
   const commonMessageContent =
-    'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。主語は「おいら」にしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。'
+    'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。自分のことは「おいら」と言うようにしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。'
   const failedMessage = '失敗しちゃった。もう一回試してね。'
 
   if (!validateSignature(event.body!, signature!)) {
@@ -114,57 +114,87 @@ exports.handler = async (event: APIGatewayEvent) => {
         if (event.type === 'message' && event.message.type === 'text') {
           const replyToken = event.replyToken
           const message = event.message.text
-          const commonMessage = {
-            role: ChatCompletionRequestMessageRoleEnum.System,
-            content: commonMessageContent,
-          }
+          const keywordRemovalPattern = new RegExp(
+            `(の|を)?((写真|しゃしん)(の|を)?(撮って|とって)).*`,
+            'g',
+          )
+          const imageGenerationKeyword = message.match(keywordRemovalPattern)
 
-          const data = await fetchPreviousConversations(userId)
+          if (Boolean(imageGenerationKeyword)) {
+            const promptMessage = message.replace(keywordRemovalPattern, '')
+            const response = await openai.createImage({
+              prompt: promptMessage,
+              n: 1,
+              size: '512x512',
+            })
 
-          const items =
-            data.Items?.map((item) => {
-              return {
-                role: item.role,
-                content: item.content,
-              }
-            }).reverse() || []
-
-          const response = await openai.createChatCompletion({
-            model: modelName,
-            messages: [
-              commonMessage,
-              ...items,
+            const answerImage = response.data.data[0].url!
+            const userMessage: Message[] = [
               {
-                role: ChatCompletionRequestMessageRoleEnum.User,
-                content: message,
-              },
-            ],
-          })
-
-          const answer = response.data.choices[0].message?.content
-
-          if (answer) {
-            const conversations: Conversation[] = [
-              {
-                role: ChatCompletionRequestMessageRoleEnum.User,
-                content: message,
+                type: 'image',
+                originalContentUrl: answerImage,
+                previewImageUrl: answerImage,
               },
               {
-                role: ChatCompletionRequestMessageRoleEnum.Assistant,
-                content: answer,
+                type: 'text',
+                text: 'いい写真撮れたでしょ〜',
               },
             ]
 
-            await addConversations(conversations, userId).catch((err) => {
-              console.log('DB put error: ', err)
-            })
-          }
+            return client.replyMessage(replyToken, userMessage)
+          } else {
+            const commonMessage = {
+              role: ChatCompletionRequestMessageRoleEnum.System,
+              content: commonMessageContent,
+            }
 
-          const userMessage: Message = {
-            type: 'text',
-            text: answer || failedMessage,
+            const data = await fetchPreviousConversations(userId)
+
+            const items =
+              data.Items?.map((item) => {
+                return {
+                  role: item.role,
+                  content: item.content,
+                }
+              }).reverse() || []
+
+            const response = await openai.createChatCompletion({
+              model: modelName,
+              messages: [
+                commonMessage,
+                ...items,
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.User,
+                  content: message,
+                },
+              ],
+            })
+
+            const answer = response.data.choices[0].message?.content
+
+            if (answer) {
+              const conversations: Conversation[] = [
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.User,
+                  content: message,
+                },
+                {
+                  role: ChatCompletionRequestMessageRoleEnum.Assistant,
+                  content: answer,
+                },
+              ]
+
+              await addConversations(conversations, userId).catch((err) => {
+                console.log('DB put error: ', err)
+              })
+            }
+
+            const userMessage: Message = {
+              type: 'text',
+              text: answer || failedMessage,
+            }
+            return client.replyMessage(replyToken, userMessage)
           }
-          return client.replyMessage(replyToken, userMessage)
         }
 
         if (event.type === 'message' && event.message.type === 'image') {
