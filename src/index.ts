@@ -120,13 +120,17 @@ exports.handler = async (event: APIGatewayEvent) => {
           )
           const imageGenerationKeyword = message.match(keywordRemovalPattern)
 
+          console.log('DEBUG imageGenerationKeyword: ', imageGenerationKeyword)
+
           if (Boolean(imageGenerationKeyword)) {
+            console.log('DEBUG start image generation')
             const promptMessage = message.replace(keywordRemovalPattern, '')
             const response = await openai.createImage({
               prompt: promptMessage,
               n: 1,
               size: '512x512',
             })
+            console.log('DEBUG end image generation: ', response.data)
 
             const answerImage = response.data.data[0].url!
             const userMessage: Message[] = [
