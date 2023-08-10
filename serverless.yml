@@ -29,6 +29,7 @@ functions:
       OPENAI_API_KEY: ${env:OPENAI_API_KEY}
       DYNAMODB_TABLE_NAME: ${self:provider.environment.DYNAMODB_TABLE_NAME}
       GOOGLE_APPLICATION_CREDENTIALS: ${env:GOOGLE_APPLICATION_CREDENTIALS}
+      COMMON_MESSAGE: ${env:COMMON_MESSAGE}
 
 resources:
   Resources:
