@@ -26,6 +26,7 @@ const dynamoDB = new DynamoDB.DocumentClient()
 const visionClient = new vision.ImageAnnotatorClient({
   credentials: googleApplicationCredentials,
 })
+const commonMessageContent = process.env.COMMON_MESSAGE!
 
 function validateSignature(body: string, signature: string) {
   const hash = crypto
@@ -86,8 +87,6 @@ exports.handler = async (event: APIGatewayEvent) => {
   const signature = event.headers['x-line-signature']
   const userId = body.events[0].source.userId!
   const modelName = 'gpt-4'
-  const commonMessageContent =
-    'あなたの名前はちびわれです。生意気な感じでタメ口で可愛らしく、絵文字もたくさん使いながら喋ってください。自分のことは「おいら」と言うようにしてください。返事するときは「はい」ではなく、「うい〜。」としてください。語尾は「だよな！」「だぜ！」としてください。'
   const failedMessage = '失敗しちゃった。もう一回試してね。'
 
   if (!validateSignature(event.body!, signature!)) {
