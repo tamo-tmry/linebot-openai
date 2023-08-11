@@ -22,7 +22,7 @@ functions:
       - http:
           path: /
           method: POST
-    timeout: 30
+    timeout: 60
     environment:
       LINE_CHANNEL_SECRET: ${env:LINE_CHANNEL_SECRET}
       LINE_CHANNEL_ACCESS_TOKEN: ${env:LINE_CHANNEL_ACCESS_TOKEN}
